@@ -7,7 +7,7 @@
     "start": "node main.js",
     "dev": "node main.js --watch",
     "lint": "eslint .",
-    "test": "jest"
+    "test": "rm -f todo.test.db && jest --verbose"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
