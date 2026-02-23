@@ -2,9 +2,10 @@
   "name": "express-crud-todo",
   "version": "1.0.0",
   "description": "a todo api",
-  "main": "app.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node main.js",
+    "dev": "node main.js --watch",
     "lint": "eslint .",
     "test": "jest"
   },
