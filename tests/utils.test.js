@@ -1,4 +1,4 @@
-const { toArray, formatTodo, formatTodos } = require("./utils");
+const { toArray, formatTodo, formatTodos } = require("../helpers/utils");
 
 describe("Todo Helpers", () => {
   test("toArray helper function", () => {
