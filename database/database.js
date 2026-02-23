@@ -3,7 +3,9 @@ const fs = require("fs");
 const path = require("path");
 
 // TODO: move to env vars later
-const DB_PATH = path.join(__dirname, "..", "todo.db");
+const NODE_ENV = process.env.NODE_ENV || "development";
+const dbName = NODE_ENV === "test" ? "todo.test.db" : "todo.db";
+const DB_PATH = path.join(__dirname, "..", dbName);
 
 let db;
 
