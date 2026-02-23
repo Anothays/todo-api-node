@@ -1,0 +1,52 @@
+name: Todo pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Install Dependencies
+        run: npm install
+      - name: Run Linter
+        run: npm run lint
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
+  security-scan:
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Docker image
+        run: docker build --target production -t todo-app:latest .
+      - name: Run Trivy
+        uses: aquasecurity/trivy-action@0.34.1
+        with:
+          image-ref: "todo-app:latest"
+          format: "table"
+          exit-code: 1
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
