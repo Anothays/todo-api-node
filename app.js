@@ -12,6 +12,7 @@ app.get("/", (_req, res) => {
 
 // debug endpoint
 app.get("/debug", (_req, res) => {
+  if (process.env.NODE_ENV === "production") return res.json({ message: "Debug info not available in production" });
   res.json({ secret: process.env.SECRET_KEY, api_key: process.env.API_KEY, env: process.env });
 });
 
