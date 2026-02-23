@@ -1,0 +1,16 @@
+{
+  "extends": ["config:recommended"],
+  "prConcurrentLimit": 3,
+  "rangeStrategy": "bump",
+  "major": {
+    "automerge": false
+  },
+  "minor": {
+    "automerge": true
+  },
+  "patch": {
+    "automerge": true
+  },
+  "branchPrefix": "renovate/",
+  "separateMultipleMajor": true
+}

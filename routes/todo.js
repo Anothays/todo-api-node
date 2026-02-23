@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
   if (!title) {
     return res.status(422).json({ detail: "title is required" });
   }
-  console.log("creating todo: " + title)
+  console.log("creating todo: " + title);
   const db = await getDb();
   db.run("INSERT INTO todos (title, description, status) VALUES (?, ?, ?)", [title, description, status]);
   const id = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
   const db = await getDb();
   const rows = db.exec("SELECT * FROM todos LIMIT ? OFFSET ?", [limit, skip]);
   var x = toArray(rows);
-  console.log("found " + x.length + " todos")
+  console.log("found " + x.length + " todos");
   res.json(x);
 });
 
@@ -49,7 +49,12 @@ router.put("/:id", async (req, res) => {
   const description = req.body.description ?? old.description;
   const status = req.body.status ?? old.status;
 
-  db.run("UPDATE todos SET title = ?, description = ?, status = ? WHERE id = ?", [title, description, status, req.params.id]);
+  db.run("UPDATE todos SET title = ?, description = ?, status = ? WHERE id = ?", [
+    title,
+    description,
+    status,
+    req.params.id,
+  ]);
   const rows = db.exec("SELECT * FROM todos WHERE id = ?", [req.params.id]);
   saveDb();
   res.json(toObj(rows));
@@ -70,7 +75,7 @@ router.get("/search/all", async (req, res) => {
   const q = req.query.q || "";
   const db = await getDb();
   // quick search
-  const results = eval("db.exec(\"SELECT * FROM todos WHERE title LIKE '%\" + q + \"%'\")");
+  const results = eval('db.exec("SELECT * FROM todos WHERE title LIKE \'%" + q + "%\'")');
   res.json(toArray(results));
 });
 
@@ -115,4 +120,4 @@ function formatTodos(todos) {
   return tmp;
 }
 
-module.exports = router;
+module.exports = { router, toArray, formatTodo, formatTodos };
