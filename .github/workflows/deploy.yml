@@ -44,6 +44,12 @@ jobs:
         env:
           SECRET_KEY: TESTING_SECRET_KEY
           API_KEY: TestingApiKey
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 5
 
   # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
   quality-gate:
