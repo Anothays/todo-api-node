@@ -41,16 +41,6 @@ jobs:
         env:
           SECRET_KEY: TESTING_SECRET_KEY
           API_KEY: TestingApiKey
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 5
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          directory: ./coverage/
 
   # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
   quality-gate:
@@ -100,15 +90,7 @@ jobs:
     needs: [lint, test, quality-gate, security-scan]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
-<<<<<<< HEAD
-<<<<<<< HEAD
       SVC_ID: ${{ secrets.SVC_ID_PROD }}
-=======
-      SVC_ID: 435d5c7c-ae21-47fc-81d7-0a0b0747c1cd
->>>>>>> 7fa4779 (add service into deploy-prod and deploy-staging)
-=======
-      SVC_ID: ${{ secrets.SVC_ID_PROD }}
->>>>>>> d07d345 (make servicesIds as secrets)
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -123,15 +105,7 @@ jobs:
     needs: [lint, test, quality-gate, security-scan]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
-<<<<<<< HEAD
-<<<<<<< HEAD
       SVC_ID: ${{ secrets.SVC_ID_STAGING }}
-=======
-      SVC_ID: 093ef275-0210-44fe-b117-1cd8737ed3da
->>>>>>> 7fa4779 (add service into deploy-prod and deploy-staging)
-=======
-      SVC_ID: ${{ secrets.SVC_ID_STAGING }}
->>>>>>> d07d345 (make servicesIds as secrets)
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -151,7 +125,6 @@ jobs:
         run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
   publish-image:
-<<<<<<< HEAD
     if: github.event_name == 'push'
     environment: production
     runs-on: ubuntu-latest
@@ -165,50 +138,17 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-=======
-    environment: staging
-    if: github.event_name == 'push'
-    environment: staging
-    runs-on: ubuntu-latest
-    permissions:
-        contents: read
-        packages: write
-    steps:
-      - name: Checkout code     
-        uses: actions/checkout@v6
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io      
->>>>>>> d5c2feb (Fix ghrc (#13))
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels)
         id: meta
-<<<<<<< HEAD
-<<<<<<< HEAD
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
       - name: Build and push
         uses: docker/build-push-action@v5
-=======
-        uses: docker/metadata-action@70f0d855c7b11b0b2bf4d9e2c6bc37a1fb5a39d8
-        with:
-          images: ghcr.io/${{ github.repository }}
-      - name: Build and push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
->>>>>>> d5c2feb (Fix ghrc (#13))
-=======
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-      - name: Build and push
-        uses: docker/build-push-action@v5
->>>>>>> a506a92 (Fix ghrc (#15))
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-  
