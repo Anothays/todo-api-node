@@ -81,3 +81,31 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: "CRITICAL"
+
+  publish-image:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9f5f6c37ebec7b29a6f11c2f5c0bef24f49
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@70f0d855c7b11b0b2bf4d9e2c6bc37a1fb5a39d8
+        with:
+          images: ghcr.io/${{ github.repository }}
+      - name: Build and push
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
