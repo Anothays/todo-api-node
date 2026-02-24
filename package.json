@@ -2,12 +2,13 @@
   "name": "express-crud-todo",
   "version": "1.0.0",
   "description": "a todo api",
+  "type": "module",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "dev": "node main.js --watch",
     "lint": "eslint .",
-    "test": "rm -f todo.test.db && jest --verbose --coverage"
+    "test": "rm -f todo.test.db && node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --coverage"
   },
   "dependencies": {
     "dotenv": "^17.3.1",

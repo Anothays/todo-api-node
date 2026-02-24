@@ -52,4 +52,4 @@ function anotherDeadFunction(data) {
   return result;
 }
 
-module.exports = { toObj, toArray, formatTodo, formatTodos, unusedHelper, anotherDeadFunction };
+export { toObj, toArray, formatTodo, formatTodos, unusedHelper, anotherDeadFunction };
