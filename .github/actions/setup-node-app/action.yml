@@ -1,0 +1,19 @@
+name: Setup Node.js app
+description: Checkout, setup Node.js and install npm dependencies
+inputs:
+  node-version:
+    description: Node.js version
+    required: false
+    default: "25"
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+    - name: Install Dependencies
+      run: npm install
+      shell: bash
