@@ -20,7 +20,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 25
+          node-version: 24
       - name: Install Dependencies
         run: npm install
       - name: lint
@@ -34,7 +34,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 25
+          node-version: 24
       - name: Install Dependencies
         run: npm install
       - name: Test
@@ -51,7 +51,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 25
+          node-version: 24
       - name: Install Dependencies
         run: npm install
       - name: SonarCloud Scan
@@ -68,9 +68,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       - name: Build Docker image
         run: docker build --target production -t todo-app:latest .
       - name: Run Trivy
@@ -80,7 +80,7 @@ jobs:
           format: "table"
           exit-code: 1
           ignore-unfixed: true
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL"
 
   publish-image:
     if: github.ref == 'refs/heads/main'

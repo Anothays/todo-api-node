@@ -1,6 +1,6 @@
-const { Router } = require("express");
-const { getDb, saveDb } = require("../database/database");
-const { toArray, toObj } = require("../helpers/utils");
+import { Router } from "express";
+import { getDb, saveDb } from "../database/database.js";
+import { toArray, toObj } from "../helpers/utils.js";
 
 const router = Router();
 
@@ -80,4 +80,4 @@ router.get("/search/all", async (req, res) => {
   res.json(toArray(results));
 });
 
-module.exports = router;
+export default router;
