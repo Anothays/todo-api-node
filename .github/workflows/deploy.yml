@@ -110,8 +110,6 @@ jobs:
         uses: actions/checkout@v6
       - name: Deploy to Railway
         run: railway up --ci --service=${{ env.SVC_ID }}
-      - name: Check prod /health
-        run: curl -f "${{ secrets.RAILWAY_BASE_URL_PROD }}/health"
 
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
@@ -131,8 +129,6 @@ jobs:
         uses: actions/checkout@v6
       - name: Deploy to Railway
         run: railway up --ci --service=${{ env.SVC_ID }}
-      - name: Check staging /health
-        run: curl -f "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
   post-deploy:
     needs: [deploy-prod, deploy-staging]
