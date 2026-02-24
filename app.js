@@ -1,6 +1,6 @@
-const express = require("express");
-const todoRouter = require("./routes/todo");
-require("dotenv").config();
+import express from "express";
+import todoRouter from "./routes/todo.js";
+import "dotenv/config";
 
 const app = express();
 app.use(express.json());
@@ -18,4 +18,4 @@ app.get("/debug", (_req, res) => {
 
 app.use("/todos", todoRouter);
 
-module.exports = app;
+export default app;

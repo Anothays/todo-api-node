@@ -1,5 +1,5 @@
-const request = require("supertest");
-const app = require("../app");
+import request from "supertest";
+import app from "../app.js";
 
 describe("Testing endpoints", () => {
   it(`GET on "/"" responds with a welcome message`, () => {
@@ -16,6 +16,7 @@ describe("Testing endpoints", () => {
   });
 
   it(`GET on "/debug" responds with debug information`, () => {
+    console.log("process.env.NODE_ENV -> ", process.env.NODE_ENV);
     return request(app)
       .get("/debug")
       .expect(200)

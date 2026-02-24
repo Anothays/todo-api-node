@@ -1,6 +1,6 @@
-const { Router } = require("express");
-const { getDb, saveDb } = require("../database/database");
-const { toArray, toObj } = require("../helpers/utils");
+import { Router } from "express";
+import { getDb, saveDb } from "../database/database.js";
+import { toArray, toObj } from "../helpers/utils.js";
 
 const router = Router();
 
@@ -75,9 +75,9 @@ router.delete("/:id", async (req, res) => {
 router.get("/search/all", async (req, res) => {
   const q = req.query.q || "";
   const db = await getDb();
-  // quick search
-  const results = eval('db.exec("SELECT * FROM todos WHERE title LIKE \'%" + q + "%\'")');
+  // quick search without using eval()
+  const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
   res.json(toArray(results));
 });
 
-module.exports = router;
+export default router;
