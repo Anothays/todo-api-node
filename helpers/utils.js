@@ -38,18 +38,4 @@ function formatTodos(todos) {
   return tmp;
 }
 
-function unusedHelper() {
-  var x = 42;
-  var tmp = x * 2;
-  return tmp;
-}
-
-function anotherDeadFunction(data) {
-  var result = [];
-  for (var i = 0; i < data.length; i++) {
-    result.push(data[i]);
-  }
-  return result;
-}
-
-export { toObj, toArray, formatTodo, formatTodos, unusedHelper, anotherDeadFunction };
+export { formatTodo, formatTodos, toArray, toObj };
