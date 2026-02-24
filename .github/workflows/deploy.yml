@@ -132,7 +132,7 @@ jobs:
   publish-image:
     environment: staging
     if: github.event_name == 'push'
-  #   environment: staging
+    environment: staging
     runs-on: ubuntu-latest
     permissions:
         contents: read
@@ -141,18 +141,18 @@ jobs:
       - name: Checkout code     
         uses: actions/checkout@v6
       - name: Log in to GHCR
-        uses: docker/login-action@c94ce9f5f6c37ebec7b29a6f11c2f5c0bef24f49
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io      
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@70f0d855c7b11b0b2bf4d9e2c6bc37a1fb5a39d8
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
       - name: Build and push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
