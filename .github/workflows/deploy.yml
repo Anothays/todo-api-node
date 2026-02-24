@@ -130,7 +130,7 @@ jobs:
         run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
   publish-image:
-    environment: staging
+  #  environment: staging
     if: github.event_name == 'push'
     environment: staging
     runs-on: ubuntu-latest
