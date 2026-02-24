@@ -4,15 +4,17 @@ API REST de gestion de tâches (todos), construite avec Express et SQLite (sql.j
 
 ## Badges
 
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Anothays_todo-api-node&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Anothays_todo-api-node)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D24.x-brightgreen.svg)](https://nodejs.org/)
 [![npm](https://img.shields.io/badge/npm-10.x-red.svg)](https://www.npmjs.com/)
 [![Express](https://img.shields.io/badge/express-5.x-000000.svg)](https://expressjs.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![codecov](https://codecov.io/gh/TON_PSEUDO/TON_REPO/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/Anothays/todo-api-node)
 
 ## Technologies et versions
 
 | Technologie | Version |
-|-------------|---------|
+| ----------- | ------- |
 | Node.js     | ≥ 24    |
 | npm         | 10.x    |
 | Express     | 5.x     |
@@ -82,12 +84,12 @@ Le serveur écoute sur `http://localhost:3000` (ou le port défini par `PORT`).
 
 ## Scripts disponibles
 
-| Commande      | Description                          |
-|---------------|--------------------------------------|
-| `npm start`  | Démarre le serveur                   |
-| `npm run dev`| Démarre le serveur en mode watch     |
-| `npm run lint`| Lance ESLint                         |
-| `npm test`   | Lance les tests Jest avec couverture  |
+| Commande       | Description                          |
+| -------------- | ------------------------------------ |
+| `npm start`    | Démarre le serveur                   |
+| `npm run dev`  | Démarre le serveur en mode watch     |
+| `npm run lint` | Lance ESLint                         |
+| `npm test`     | Lance les tests Jest avec couverture |
 
 ## Structure du projet
 
