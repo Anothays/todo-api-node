@@ -127,7 +127,7 @@ jobs:
   publish-image:
     if: github.ref == 'refs/heads/main'
     environment: production
-    needs: [lint, test, quality-gate, security-scan]
+    needs: [deploy-prod]
     runs-on: ubuntu-latest
     permissions:
       contents: read
