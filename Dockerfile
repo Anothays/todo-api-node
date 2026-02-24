@@ -1,18 +1,4 @@
-FROM node:25.6-alpine3.22 AS development
-
-WORKDIR /app
-
-COPY package*.json ./
-
-RUN npm ci
-
-COPY . .
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-
-FROM node:25.6-alpine3.22 AS production
+FROM node:24.14-alpine3.22
 
 WORKDIR /app
 
