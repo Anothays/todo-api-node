@@ -50,6 +50,10 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 5
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          directory: ./coverage/
 
   # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
   quality-gate:
@@ -164,3 +168,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+  

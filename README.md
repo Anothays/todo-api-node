@@ -8,6 +8,7 @@ API REST de gestion de tâches (todos), construite avec Express et SQLite (sql.j
 [![npm](https://img.shields.io/badge/npm-10.x-red.svg)](https://www.npmjs.com/)
 [![Express](https://img.shields.io/badge/express-5.x-000000.svg)](https://expressjs.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![codecov](https://codecov.io/gh/TON_PSEUDO/TON_REPO/branch/main/graph/badge.svg?token=)](https://codecov.io/gh/Anothays/todo-api-node)
 
 ## Technologies et versions
 
