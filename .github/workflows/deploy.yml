@@ -47,6 +47,12 @@ jobs:
           name: coverage-report
           path: coverage/
           retention-days: 5
+      - name: Send coverage to SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+          sonar.javascript.lcov.reportPaths: coverage/lcov.info
 
   # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
   quality-gate:
