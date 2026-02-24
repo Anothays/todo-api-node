@@ -26,6 +26,20 @@ describe("Testing endpoints", () => {
         expect(response.body).toHaveProperty("env");
       });
   });
+
+  it(`GET on "/debug" responds with restricted message when NODE_ENV is production`, () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    return request(app)
+      .get("/debug")
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toEqual({ message: "Debug info not available in production" });
+      })
+      .finally(() => {
+        process.env.NODE_ENV = originalNodeEnv;
+      });
+  });
 });
 
 describe("Testing /todos endpoints", () => {
