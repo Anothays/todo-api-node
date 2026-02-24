@@ -16,6 +16,7 @@ describe("Testing endpoints", () => {
   });
 
   it(`GET on "/debug" responds with debug information`, () => {
+    console.log("process.env.NODE_ENV -> ", process.env.NODE_ENV);
     return request(app)
       .get("/debug")
       .expect(200)

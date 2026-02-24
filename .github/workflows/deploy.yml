@@ -2,9 +2,13 @@ name: Todo pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -16,12 +20,40 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 25
       - name: Install Dependencies
         run: npm install
-      - name: Run Linter
+      - name: lint
         run: npm run lint
 
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 25
+      - name: Install Dependencies
+        run: npm install
+      - name: Test
+        run: npm run test
+        env:
+          SECRET_KEY: TESTING_SECRET_KEY
+          API_KEY: TestingApiKey
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 25
+      - name: Install Dependencies
+        run: npm install
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
@@ -29,7 +61,6 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
 
   security-scan:
-    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
