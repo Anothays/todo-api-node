@@ -66,7 +66,7 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
-    environment: production
+    environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
