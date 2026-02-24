@@ -1,9 +1,35 @@
-const { Router } = require("express");
-const { getDb, saveDb } = require("../database/database");
-const { toArray, toObj } = require("../helpers/utils");
+import { Router } from "express";
+import { getDb, saveDb } from "../database/database.js";
+import { toArray, toObj } from "../helpers/utils.js";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /todos:
+ *   post:
+ *     summary: Créer un todo
+ *     tags: [Todos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoInput'
+ *     responses:
+ *       201:
+ *         description: Todo créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ *       422:
+ *         description: Champ requis manquant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // POST /todos
 router.post("/", async (req, res) => {
   const { title, description = null, status = "pending" } = req.body;
@@ -20,6 +46,35 @@ router.post("/", async (req, res) => {
   res.status(201).json(todo);
 });
 
+/**
+ * @swagger
+ * /todos:
+ *   get:
+ *     summary: Récupérer tous les todos
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Nombre d'éléments à ignorer (pagination)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Nombre maximum d'éléments à retourner
+ *     responses:
+ *       200:
+ *         description: Liste des todos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
+ */
 // GET /todos
 router.get("/", async (req, res) => {
   const skip = parseInt(req.query.skip) || 0;
@@ -75,9 +130,9 @@ router.delete("/:id", async (req, res) => {
 router.get("/search/all", async (req, res) => {
   const q = req.query.q || "";
   const db = await getDb();
-  // quick search
-  const results = eval('db.exec("SELECT * FROM todos WHERE title LIKE \'%" + q + "%\'")');
+  // quick search without using eval()
+  const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
   res.json(toArray(results));
 });
 
-module.exports = router;
+export default router;

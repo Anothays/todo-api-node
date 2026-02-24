@@ -1,5 +1,6 @@
 /** @type {import('jest').Config} */
 const config = {
+  coverageProvider: "v8",
   coverageThreshold: {
     global: {
       branches: 70,
@@ -10,4 +11,4 @@ const config = {
   },
 };
 
-module.exports = config;
+export default config;
