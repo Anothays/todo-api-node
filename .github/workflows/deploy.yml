@@ -101,10 +101,14 @@ jobs:
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
 <<<<<<< HEAD
+<<<<<<< HEAD
       SVC_ID: ${{ secrets.SVC_ID_PROD }}
 =======
       SVC_ID: 435d5c7c-ae21-47fc-81d7-0a0b0747c1cd
 >>>>>>> 7fa4779 (add service into deploy-prod and deploy-staging)
+=======
+      SVC_ID: ${{ secrets.SVC_ID_PROD }}
+>>>>>>> d07d345 (make servicesIds as secrets)
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -120,10 +124,14 @@ jobs:
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
 <<<<<<< HEAD
+<<<<<<< HEAD
       SVC_ID: ${{ secrets.SVC_ID_STAGING }}
 =======
       SVC_ID: 093ef275-0210-44fe-b117-1cd8737ed3da
 >>>>>>> 7fa4779 (add service into deploy-prod and deploy-staging)
+=======
+      SVC_ID: ${{ secrets.SVC_ID_STAGING }}
+>>>>>>> d07d345 (make servicesIds as secrets)
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
