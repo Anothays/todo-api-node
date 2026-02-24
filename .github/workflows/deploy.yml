@@ -95,11 +95,12 @@ jobs:
     needs: [lint, test, quality-gate, security-scan]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+      SVC_ID: 435d5c7c-ae21-47fc-81d7-0a0b0747c1cd
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway up --ci
+        run: railway up --ci --service=${{ env.SVC_ID }}
 
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
@@ -109,11 +110,12 @@ jobs:
     needs: [lint, test, quality-gate, security-scan]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+      SVC_ID: 093ef275-0210-44fe-b117-1cd8737ed3da
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway up --ci
+        run: railway up --ci --service=${{ env.SVC_ID }}
 
   post-deploy:
     if: github.event.deployment_status.state == 'success'
