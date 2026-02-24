@@ -27,6 +27,9 @@ jobs:
         run: npm run lint
       - name: Test
         run: npm run test
+        env:
+          SECRET_KEY: TESTING_SECRET_KEY
+          API_KEY: TestingApiKey
 
   quality-gate:
     runs-on: ubuntu-latest
