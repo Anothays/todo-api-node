@@ -2,9 +2,9 @@ name: Todo pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,7 +14,7 @@ jobs:
   lint:
     # if: false
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -29,7 +29,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -48,7 +48,7 @@ jobs:
   # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
   quality-gate:
     runs-on: ubuntu-latest
-    environment: production
+    # environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -66,7 +66,7 @@ jobs:
 
   security-scan:
     runs-on: ubuntu-latest
-    environment: staging
+    # environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -86,6 +86,48 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: "CRITICAL"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    container: ghcr.io/railwayapp/cli:latest
+    needs: [lint, test, quality-gate, security-scan]
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+      SVC_ID: ${{ secrets.SVC_ID_PROD }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Deploy to Railway
+        run: railway up --ci --service=${{ env.SVC_ID }}
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    container: ghcr.io/railwayapp/cli:latest
+    needs: [lint, test, quality-gate, security-scan]
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+      SVC_ID: ${{ secrets.SVC_ID_STAGING }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Deploy to Railway
+        run: railway up --ci --service=${{ env.SVC_ID }}
+
+  post-deploy:
+    needs: [deploy-prod, deploy-staging]
+    if: always() && (needs.deploy-prod.result == 'success' || needs.deploy-staging.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /health (prod)
+        if: needs.deploy-prod.result == 'success'
+        run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_PROD }}/health"
+      - name: Check /health (staging)
+        if: needs.deploy-staging.result == 'success'
+        run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
   # publish-image:
   #   if: github.ref == 'refs/heads/main'
