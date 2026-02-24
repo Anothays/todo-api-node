@@ -61,7 +61,6 @@ jobs:
           SONAR_HOST_URL: https://sonarcloud.io
 
   security-scan:
-    if: false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
