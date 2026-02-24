@@ -4,6 +4,32 @@ import { toArray, toObj } from "../helpers/utils.js";
 
 const router = Router();
 
+/**
+ * @swagger
+ * /todos:
+ *   post:
+ *     summary: Créer un todo
+ *     tags: [Todos]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoInput'
+ *     responses:
+ *       201:
+ *         description: Todo créé avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ *       422:
+ *         description: Champ requis manquant
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // POST /todos
 router.post("/", async (req, res) => {
   const { title, description = null, status = "pending" } = req.body;
@@ -20,6 +46,35 @@ router.post("/", async (req, res) => {
   res.status(201).json(todo);
 });
 
+/**
+ * @swagger
+ * /todos:
+ *   get:
+ *     summary: Récupérer tous les todos
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: query
+ *         name: skip
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *         description: Nombre d'éléments à ignorer (pagination)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Nombre maximum d'éléments à retourner
+ *     responses:
+ *       200:
+ *         description: Liste des todos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
+ */
 // GET /todos
 router.get("/", async (req, res) => {
   const skip = parseInt(req.query.skip) || 0;
@@ -31,6 +86,63 @@ router.get("/", async (req, res) => {
   res.json(x);
 });
 
+/**
+ * @swagger
+ * /todos/search/all:
+ *   get:
+ *     summary: Rechercher les todos par titre
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *           default: ""
+ *         description: Chaîne de recherche dans le titre
+ *     responses:
+ *       200:
+ *         description: Liste des todos correspondants
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
+ */
+router.get("/search/all", async (req, res) => {
+  const q = req.query.q || "";
+  const db = await getDb();
+  const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
+  res.json(toArray(results));
+});
+
+/**
+ * @swagger
+ * /todos/{id}:
+ *   get:
+ *     summary: Récupérer un todo par ID
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID du todo
+ *     responses:
+ *       200:
+ *         description: Todo trouvé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ *       404:
+ *         description: Todo non trouvé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // GET /todos/:id
 router.get("/:id", async (req, res) => {
   const db = await getDb();
@@ -39,6 +151,38 @@ router.get("/:id", async (req, res) => {
   res.json(toObj(rows));
 });
 
+/**
+ * @swagger
+ * /todos/{id}:
+ *   put:
+ *     summary: Mettre à jour un todo
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID du todo
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoInput'
+ *     responses:
+ *       200:
+ *         description: Todo mis à jour
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Todo'
+ *       404:
+ *         description: Todo non trouvé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // PUT /todos/:id
 router.put("/:id", async (req, res) => {
   const db = await getDb();
@@ -61,6 +205,37 @@ router.put("/:id", async (req, res) => {
   res.json(toObj(rows));
 });
 
+/**
+ * @swagger
+ * /todos/{id}:
+ *   delete:
+ *     summary: Supprimer un todo
+ *     tags: [Todos]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID du todo
+ *     responses:
+ *       200:
+ *         description: Todo supprimé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 detail:
+ *                   type: string
+ *                   example: "Todo deleted"
+ *       404:
+ *         description: Todo non trouvé
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 // DELETE /todos/:id
 router.delete("/:id", async (req, res) => {
   const db = await getDb();
@@ -69,15 +244,6 @@ router.delete("/:id", async (req, res) => {
   db.run("DELETE FROM todos WHERE id = ?", [req.params.id]);
   saveDb();
   res.json({ detail: "Todo deleted" });
-});
-
-// search endpoint
-router.get("/search/all", async (req, res) => {
-  const q = req.query.q || "";
-  const db = await getDb();
-  // quick search without using eval()
-  const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
-  res.json(toArray(results));
 });
 
 export default router;

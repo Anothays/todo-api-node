@@ -15,7 +15,9 @@
     "express": "^5.1.0",
     "lodash": "^4.17.23",
     "moment": "^2.29.4",
-    "sql.js": "^1.6.0"
+    "sql.js": "^1.6.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "eslint": "^10.0.1",
