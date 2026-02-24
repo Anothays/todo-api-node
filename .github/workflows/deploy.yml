@@ -70,7 +70,7 @@ jobs:
         with:
           node-version: 24
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       - name: Build Docker image
         run: docker build --target production -t todo-app:latest .
       - name: Run Trivy
