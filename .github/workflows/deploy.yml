@@ -89,6 +89,7 @@ jobs:
 
   # publish-image:
   #   if: github.ref == 'refs/heads/main'
+  #   environment: staging
   #   runs-on: ubuntu-latest
   #   permissions:
   #     contents: read
