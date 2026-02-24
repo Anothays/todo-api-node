@@ -125,8 +125,9 @@ jobs:
         run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
   publish-image:
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     environment: production
+    needs: [deploy-prod]
     runs-on: ubuntu-latest
     permissions:
       contents: read
