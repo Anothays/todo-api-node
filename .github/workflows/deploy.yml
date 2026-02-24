@@ -2,12 +2,12 @@ name: Todo pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
-  lint:
+  Lint:
     # if: false
     runs-on: ubuntu-latest
     steps:
@@ -19,9 +19,14 @@ jobs:
           node-version: 22
       - name: Install Dependencies
         run: npm install
-      - name: Run Linter
+      - name: Lint
         run: npm run lint
+      - name: Test
+        run: npm run test
 
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
