@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Lint:
+  lint:
     # if: false
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +23,7 @@ jobs:
           node-version: 25
       - name: Install Dependencies
         run: npm install
-      - name: Lint
+      - name: lint
         run: npm run lint
 
   tests:
