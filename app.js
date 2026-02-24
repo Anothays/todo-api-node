@@ -1,9 +1,13 @@
 const express = require("express");
 const todoRouter = require("./routes/todo");
 require("dotenv").config();
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./swagger.json')
 
 const app = express();
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
 
 app.get("/", (_req, res) => {
   console.log("someone hit the root endpoint");
