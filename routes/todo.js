@@ -81,7 +81,7 @@ router.get("/", async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const db = await getDb();
   const rows = db.exec("SELECT * FROM todos LIMIT ? OFFSET ?", [limit, skip]);
-  var x = toArray(rows);
+  const x = toArray(rows);
   console.log("found " + x.length + " todos");
   res.json(x);
 });
