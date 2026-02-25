@@ -20,7 +20,6 @@ let db;
  */
 async function getDb() {
   if (db) return db;
-  console.log("initializing database connection");
   const SQL = await initSqlJs();
   if (fs.existsSync(DB_PATH)) {
     const buffer = fs.readFileSync(DB_PATH);
@@ -46,10 +45,18 @@ async function getDb() {
  */
 function saveDb() {
   if (db) {
-    console.log("saving database to disk");
     const data = db.export();
     fs.writeFileSync(DB_PATH, Buffer.from(data));
   }
 }
 
-export { getDb, saveDb };
+/**
+ * Resets the in-memory db and removes the db file. For test isolation only.
+ * @returns {void}
+ */
+function resetForTesting() {
+  db = null;
+  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+}
+
+export { getDb, saveDb, resetForTesting };

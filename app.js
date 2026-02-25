@@ -3,12 +3,15 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { spec } from "./config/swagger.js";
 import todoRouter from "./routes/todo.js";
+import { helmetMiddleware } from "./config/helmet.js";
+
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use("/todos", todoRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
+app.use(helmetMiddleware);
 
 /**
  * @swagger
@@ -30,7 +33,6 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
  */
 app.get("/", (_req, res) => {
   try {
-    console.log("someone hit the root endpoint");
     res.json({ message: "Welcome to the Enhanced Express Todo App!" });
   } catch (err) {
     console.error(err);
