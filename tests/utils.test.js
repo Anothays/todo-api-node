@@ -1,4 +1,4 @@
-import { toArray, formatTodo, formatTodos } from "../helpers/utils.js";
+import { toArray, formatTodo, formatTodoArr } from "../helpers/utils.js";
 
 describe("Todo Helpers", () => {
   test("toArray helper function", () => {
@@ -35,7 +35,7 @@ describe("Todo Helpers", () => {
     });
   });
 
-  test("formatTodos helper function", () => {
+  test("formatTodoArr helper function", () => {
     const todos = [
       {
         id: 1,
@@ -50,7 +50,7 @@ describe("Todo Helpers", () => {
         status: "completed",
       },
     ];
-    const result = formatTodos(todos);
+    const result = formatTodoArr(todos);
     expect(result).toEqual([
       {
         id: 1,
