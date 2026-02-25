@@ -73,35 +73,6 @@ app.get("/", (_req, res) => {
 
 /**
  * @swagger
- * /debug:
- *   get:
- *     summary: Infos de debug (hors production)
- *     tags: [Root]
- *     responses:
- *       200:
- *         description: En production retourne un message restreint, sinon infos d’environnement
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 secret:
- *                   type: string
- *                 api_key:
- *                   type: string
- *                 env:
- *                   type: object
- */
-// debug endpoint
-app.get("/debug", (_req, res) => {
-  if (process.env.NODE_ENV === "production") return res.json({ message: "Debug info not available in production" });
-  res.json({ secret: process.env.SECRET_KEY, api_key: process.env.API_KEY, env: process.env });
-});
-
-/**
- * @swagger
  * /health:
  *   get:
  *     summary: État de l'API (health check)

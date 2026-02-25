@@ -14,32 +14,6 @@ describe("Testing endpoints", () => {
   it(`GET on "/unknown" responds with a 404 for unknown routes`, () => {
     return request(app).get("/unknown").expect(404);
   });
-
-  it(`GET on "/debug" responds with debug information`, () => {
-    console.log("process.env.NODE_ENV -> ", process.env.NODE_ENV);
-    return request(app)
-      .get("/debug")
-      .expect(200)
-      .then((response) => {
-        expect(response.body).toHaveProperty("secret");
-        expect(response.body).toHaveProperty("api_key");
-        expect(response.body).toHaveProperty("env");
-      });
-  });
-
-  it(`GET on "/debug" responds with restricted message when NODE_ENV is production`, () => {
-    const originalNodeEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    return request(app)
-      .get("/debug")
-      .expect(200)
-      .then((response) => {
-        expect(response.body).toEqual({ message: "Debug info not available in production" });
-      })
-      .finally(() => {
-        process.env.NODE_ENV = originalNodeEnv;
-      });
-  });
 });
 
 describe("Testing /todos endpoints", () => {
