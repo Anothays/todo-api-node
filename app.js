@@ -33,7 +33,6 @@ app.use(helmetMiddleware);
  */
 app.get("/", (_req, res) => {
   try {
-    console.log("someone hit the root endpoint");
     res.json({ message: "Welcome to the Enhanced Express Todo App!" });
   } catch (err) {
     console.error(err);

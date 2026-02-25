@@ -44,7 +44,6 @@ router.post("/", async (req, res) => {
     const parsed = validate(todoInput, req.body);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { title, description, status } = parsed.data;
-    console.log("creating todo: " + title);
     const db = await getDb();
     db.run("INSERT INTO todos (title, description, status) VALUES (?, ?, ?)", [title, description ?? null, status]);
     const id = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
@@ -96,7 +95,6 @@ router.get("/", async (req, res) => {
     const db = await getDb();
     const rows = db.exec("SELECT * FROM todos LIMIT ? OFFSET ?", [limit, skip]);
     const x = toArray(rows);
-    console.log("found " + x.length + " todos");
     res.json(x);
   } catch (err) {
     console.error(err);
