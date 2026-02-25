@@ -4,6 +4,10 @@
 
 *No description*
 
+## [v.1.0.1](https://github.com/Anothays/todo-api-node/releases/tag/v.1.0.1) - 2026-02-25 12:54:19+00:00
+
+*No description*
+
 ### Feature
 
 - general:
