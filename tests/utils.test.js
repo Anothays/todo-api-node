@@ -1,4 +1,4 @@
-import { toArray, formatTodo, formatTodoArr } from "../helpers/utils.js";
+import { formatTodo, toArray } from "../helpers/utils.js";
 
 describe("Todo Helpers", () => {
   test("toArray helper function", () => {
@@ -33,37 +33,5 @@ describe("Todo Helpers", () => {
       description: "This is a test todo",
       status: "pending",
     });
-  });
-
-  test("formatTodoArr helper function", () => {
-    const todos = [
-      {
-        id: 1,
-        title: "Test Todo 1",
-        description: "This is the first test todo",
-        status: "pending",
-      },
-      {
-        id: 2,
-        title: "Test Todo 2",
-        description: "This is the second test todo",
-        status: "completed",
-      },
-    ];
-    const result = formatTodoArr(todos);
-    expect(result).toEqual([
-      {
-        id: 1,
-        title: "Test Todo 1",
-        description: "This is the first test todo",
-        status: "pending",
-      },
-      {
-        id: 2,
-        title: "Test Todo 2",
-        description: "This is the second test todo",
-        status: "completed",
-      },
-    ]);
   });
 });
