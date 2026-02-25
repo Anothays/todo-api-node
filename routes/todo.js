@@ -1,6 +1,14 @@
 import { Router } from "express";
 import { getDb, saveDb } from "../database/database.js";
 import { toArray, toObj } from "../helpers/utils.js";
+import {
+  todoInput,
+  todoInputPartial,
+  queryList,
+  querySearch,
+  paramsId,
+  validate,
+} from "./schemas/todo.schemas.js";
 
 const router = Router();
 
@@ -33,13 +41,12 @@ const router = Router();
 // POST /todos
 router.post("/", async (req, res) => {
   try {
-    const { title, description = null, status = "pending" } = req.body;
-    if (!title) {
-      return res.status(422).json({ detail: "title is required" });
-    }
+    const parsed = validate(todoInput, req.body);
+    if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
+    const { title, description, status } = parsed.data;
     console.log("creating todo: " + title);
     const db = await getDb();
-    db.run("INSERT INTO todos (title, description, status) VALUES (?, ?, ?)", [title, description, status]);
+    db.run("INSERT INTO todos (title, description, status) VALUES (?, ?, ?)", [title, description ?? null, status]);
     const id = db.exec("SELECT last_insert_rowid() as id")[0].values[0][0];
     const row = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     saveDb();
@@ -83,8 +90,9 @@ router.post("/", async (req, res) => {
 // GET /todos
 router.get("/", async (req, res) => {
   try {
-    const skip = parseInt(req.query.skip) || 0;
-    const limit = parseInt(req.query.limit) || 10;
+    const parsed = validate(queryList, req.query);
+    if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
+    const { skip, limit } = parsed.data;
     const db = await getDb();
     const rows = db.exec("SELECT * FROM todos LIMIT ? OFFSET ?", [limit, skip]);
     const x = toArray(rows);
@@ -121,7 +129,9 @@ router.get("/", async (req, res) => {
  */
 router.get("/search/all", async (req, res) => {
   try {
-    const q = req.query.q || "";
+    const parsed = validate(querySearch, req.query);
+    if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
+    const { q } = parsed.data;
     const db = await getDb();
     const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
     res.json(toArray(results));
@@ -161,8 +171,11 @@ router.get("/search/all", async (req, res) => {
 // GET /todos/:id
 router.get("/:id", async (req, res) => {
   try {
+    const parsed = validate(paramsId, req.params);
+    if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
+    const { id } = parsed.data;
     const db = await getDb();
-    const rows = db.exec("SELECT * FROM todos WHERE id = ?", [req.params.id]);
+    const rows = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     if (!rows.length || !rows[0].values.length) return res.status(404).json({ detail: "Todo not found" });
     res.json(toObj(rows));
   } catch (err) {
@@ -206,22 +219,29 @@ router.get("/:id", async (req, res) => {
 // PUT /todos/:id
 router.put("/:id", async (req, res) => {
   try {
+    const paramsParsed = validate(paramsId, req.params);
+    if (!paramsParsed.success) return res.status(422).json({ detail: paramsParsed.error.message });
+    const { id } = paramsParsed.data;
+
+    const bodyParsed = validate(todoInputPartial, req.body);
+    if (!bodyParsed.success) return res.status(422).json({ detail: bodyParsed.error.message });
+
     const db = await getDb();
-    const existing = db.exec("SELECT * FROM todos WHERE id = ?", [req.params.id]);
+    const existing = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     if (!existing.length || !existing[0].values.length) return res.status(404).json({ detail: "Todo not found" });
 
     const old = toObj(existing);
-    const title = req.body.title ?? old.title;
-    const description = req.body.description ?? old.description;
-    const status = req.body.status ?? old.status;
+    const title = bodyParsed.data.title ?? old.title;
+    const description = bodyParsed.data.description !== undefined ? bodyParsed.data.description : old.description;
+    const status = bodyParsed.data.status ?? old.status;
 
     db.run("UPDATE todos SET title = ?, description = ?, status = ? WHERE id = ?", [
       title,
       description,
       status,
-      req.params.id,
+      id,
     ]);
-    const rows = db.exec("SELECT * FROM todos WHERE id = ?", [req.params.id]);
+    const rows = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     saveDb();
     res.json(toObj(rows));
   } catch (err) {
@@ -264,10 +284,13 @@ router.put("/:id", async (req, res) => {
 // DELETE /todos/:id
 router.delete("/:id", async (req, res) => {
   try {
+    const parsed = validate(paramsId, req.params);
+    if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
+    const { id } = parsed.data;
     const db = await getDb();
-    const existing = db.exec("SELECT * FROM todos WHERE id = ?", [req.params.id]);
+    const existing = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     if (!existing.length || !existing[0].values.length) return res.status(404).json({ detail: "Todo not found" });
-    db.run("DELETE FROM todos WHERE id = ?", [req.params.id]);
+    db.run("DELETE FROM todos WHERE id = ?", [id]);
     saveDb();
     res.json({ detail: "Todo deleted" });
   } catch (err) {
