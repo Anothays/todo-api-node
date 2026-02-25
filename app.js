@@ -1,51 +1,13 @@
 import dotenv from "dotenv";
 import express from "express";
-import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import { spec } from "./config/swagger.js";
 import todoRouter from "./routes/todo.js";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 app.use("/todos", todoRouter);
-
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: { title: "Todos API", version: "1.0.0" },
-    components: {
-      schemas: {
-        Todo: {
-          type: "object",
-          properties: {
-            id: { type: "integer", example: 1 },
-            title: { type: "string", example: "My todo" },
-            description: { type: "string", nullable: true },
-            status: { type: "string", example: "pending" },
-          },
-        },
-        TodoInput: {
-          type: "object",
-          required: ["title"],
-          properties: {
-            title: { type: "string", example: "My todo" },
-            description: { type: "string", nullable: true },
-            status: { type: "string", default: "pending", example: "pending" },
-          },
-        },
-        Error: {
-          type: "object",
-          properties: {
-            detail: { type: "string", example: "Todo not found" },
-          },
-        },
-      },
-    },
-  },
-  apis: ["./routes/todo.js", "./app.js"],
-};
-
-const spec = swaggerJsdoc(options);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 
 /**
