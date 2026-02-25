@@ -3,8 +3,8 @@ name: Todo pipeline
 on:
   push:
     branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+  # pull_request:
+  #   branches: [main, develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -164,7 +164,7 @@ jobs:
           # content: ""
           title: ${{ steps.msg.outputs.title }}
           description: ${{ steps.msg.outputs.description }}
-          image: ${{ secrets.EMBED_IMAGE }}
+          # image: ${{ secrets.EMBED_IMAGE }}
           color: ${{ steps.msg.outputs.color }}
           url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           username: GitHub Actions
