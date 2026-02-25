@@ -135,7 +135,7 @@ jobs:
         if: needs.deploy-staging.result == 'success'
         run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
 
-  notify-to-discord:
+  notify-with-discord-webhook:
     needs: [deploy-prod, deploy-staging]
     if: always()
     runs-on: ubuntu-latest
