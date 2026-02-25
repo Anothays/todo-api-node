@@ -103,3 +103,20 @@ Le serveur écoute sur `http://localhost:3000` (ou le port défini par `PORT`).
 ## Licence
 
 MIT (ou celle indiquée dans le dépôt).
+
+## How to deploy with Docker
+
+Write .env file to inject into your docker container:
+
+```
+// .env file
+SECRET_KEY=changeMe
+API_KEY=changeMe
+DB_PASSWORD=changeMe
+NODE_ENV=production
+```
+
+```shell
+docker pull ghcr.io/anothays/todo-api-node:main
+docker run -d --env-file ".env" --name todo-api-node -p 3000:3000 ghcr.io/anothays/todo-api-node:main
+```
