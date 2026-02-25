@@ -13,6 +13,7 @@ jobs:
       - uses: BobAnkh/auto-generate-changelog@v1.3.1
         with:
 <<<<<<< HEAD
+<<<<<<< HEAD
           REPO_NAME: "Anothays/todo-api-node"
           ACCESS_TOKEN: ${{secrets.GITHUBACTIONS}}
           PATH: "CHANGELOG.md"
@@ -20,6 +21,9 @@ jobs:
           TYPE: "feat:Feature,fix:Bug Fixes,docs:Documentation,refactor:Refactor,perf:Performance Improvements,test:Test"
 =======
           REPO_NAME: "<Anothays>/<todo-api-node>"
+=======
+          REPO_NAME: "Anothays/todo-api-node"
+>>>>>>> 7ed349c (Automated changelog (#31))
           ACCESS_TOKEN: ${{secrets.GITHUB_TOKEN}}
           PATH: "CHANGELOG.md"
           COMMIT_MESSAGE: "docs(CHANGELOG): update release notes"
