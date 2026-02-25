@@ -25,17 +25,4 @@ function formatTodo(todo) {
   return tmp;
 }
 
-function formatTodoArr(todos) {
-  const tmp = [];
-  for (let i = 0; i < todos.length; i++) {
-    const data = {};
-    data["id"] = todos[i].id;
-    data["title"] = todos[i].title;
-    data["description"] = todos[i].description;
-    data["status"] = todos[i].status;
-    tmp.push(data);
-  }
-  return tmp;
-}
-
-export { formatTodo, formatTodoArr, toArray, toObj };
+export { formatTodo, toArray, toObj };
