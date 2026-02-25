@@ -32,8 +32,13 @@ app.use(helmetMiddleware);
  *                   example: "Welcome to the Enhanced Express Todo App!"
  */
 app.get("/", (_req, res) => {
-  console.log("someone hit the root endpoint");
-  res.json({ message: "Welcome to the Enhanced Express Todo App!" });
+  try {
+    console.log("someone hit the root endpoint");
+    res.json({ message: "Welcome to the Enhanced Express Todo App!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ detail: err.message || "Internal server error" });
+  }
 });
 
 /**
@@ -58,7 +63,12 @@ app.get("/", (_req, res) => {
  *                   format: date-time
  */
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+  try {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ detail: err.message || "Internal server error" });
+  }
 });
 
 export default app;
