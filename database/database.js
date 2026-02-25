@@ -1,6 +1,6 @@
-import initSqlJs from "sql.js";
 import fs from "fs";
 import path from "path";
+import initSqlJs from "sql.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +13,11 @@ const DB_PATH = path.join(__dirname, "..", dbName);
 
 let db;
 
+/**
+ * Returns the SQLite (sql.js) database instance, creating and loading it from disk
+ * if needed. Creates the `todos` table if it does not exist.
+ * @returns {Promise<import("sql.js").Database>} The database instance
+ */
 async function getDb() {
   if (db) return db;
   console.log("initializing database connection");
@@ -34,6 +39,11 @@ async function getDb() {
   return db;
 }
 
+/**
+ * Persists the in-memory database to disk (.db file).
+ * Does nothing if the database has not been initialized via getDb().
+ * @returns {void}
+ */
 function saveDb() {
   if (db) {
     console.log("saving database to disk");
