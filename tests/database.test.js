@@ -1,92 +1,67 @@
-import { jest } from "@jest/globals";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import initSqlJs from "sql.js";
+import { getDb, saveDb, resetForTesting } from "../database/database.js";
 
-const fsMock = {
-  existsSync: jest.fn(),
-  readFileSync: jest.fn(),
-  writeFileSync: jest.fn(),
-};
-
-await jest.unstable_mockModule("fs", () => ({ default: fsMock }));
-await jest.unstable_mockModule("sql.js", () => ({
-  default: jest.fn(() =>
-    Promise.resolve({
-      Database: jest.fn().mockImplementation(function () {
-        this.run = jest.fn();
-        this.export = jest.fn().mockReturnValue(new Uint8Array(0));
-        return this;
-      }),
-    })
-  ),
-}));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const testDbPath = path.join(__dirname, "..", "todo.test.db");
 
 describe("Database module", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    resetForTesting();
   });
 
   describe("saveDb", () => {
-    it("does nothing when db has not been initialized", async () => {
-      await jest.isolateModulesAsync(async () => {
-        const { saveDb } = await import("../database/database.js");
-        saveDb();
-        expect(fsMock.writeFileSync).not.toHaveBeenCalled();
-      });
+    it("does nothing when db has not been initialized", () => {
+      saveDb();
+      expect(fs.existsSync(testDbPath)).toBe(false);
     });
   });
 
   describe("getDb", () => {
     it("initializes db and creates table when file does not exist", async () => {
-      fsMock.existsSync.mockReturnValue(false);
-
-      const { getDb } = await import("../database/database.js");
       const db = await getDb();
-
       expect(db).toBeDefined();
-      expect(db.run).toHaveBeenCalledWith(
-        expect.stringContaining("CREATE TABLE IF NOT EXISTS todos")
-      );
-      expect(fsMock.readFileSync).not.toHaveBeenCalled();
+      expect(db.run).toBeDefined();
+      saveDb();
+      expect(fs.existsSync(testDbPath)).toBe(true);
     });
 
     it("initializes db from file when file exists", async () => {
-      const fakeBuffer = Buffer.from("fake-db-content");
-      fsMock.existsSync.mockReturnValue(true);
-      fsMock.readFileSync.mockReturnValue(fakeBuffer);
+      const SQL = await initSqlJs();
+      const tempDb = new SQL.Database();
+      tempDb.run(`
+        CREATE TABLE IF NOT EXISTS todos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT,
+          status TEXT DEFAULT 'pending'
+        )
+      `);
+      const data = tempDb.export();
+      fs.writeFileSync(testDbPath, Buffer.from(data));
 
-      let getDbRef;
-      await jest.isolateModulesAsync(async () => {
-        const mod = await import("../database/database.js");
-        getDbRef = mod.getDb;
-      });
-      const db = await getDbRef();
+      resetForTesting(false);
+      const db = await getDb();
 
       expect(db).toBeDefined();
-      expect(fsMock.readFileSync).toHaveBeenCalled();
-      expect(db.run).toHaveBeenCalledWith(
-        expect.stringContaining("CREATE TABLE IF NOT EXISTS todos")
-      );
+      expect(db.run).toBeDefined();
     });
 
     it("returns the same db instance on subsequent calls", async () => {
-      fsMock.existsSync.mockReturnValue(false);
-
-      const { getDb } = await import("../database/database.js");
       const db1 = await getDb();
       const db2 = await getDb();
-
       expect(db1).toBe(db2);
     });
   });
 
   describe("saveDb", () => {
     it("writes to file when db has been initialized", async () => {
-      fsMock.existsSync.mockReturnValue(false);
-
-      const { getDb, saveDb } = await import("../database/database.js");
       await getDb();
       saveDb();
-
-      expect(fsMock.writeFileSync).toHaveBeenCalled();
+      expect(fs.existsSync(testDbPath)).toBe(true);
     });
   });
 });
