@@ -52,4 +52,13 @@ function saveDb() {
   }
 }
 
-export { getDb, saveDb };
+/**
+ * Resets the in-memory db and removes the db file. For test isolation only.
+ * @returns {void}
+ */
+function resetForTesting() {
+  db = null;
+  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+}
+
+export { getDb, saveDb, resetForTesting };
