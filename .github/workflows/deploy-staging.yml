@@ -62,20 +62,19 @@ jobs:
 
   post-deploy:
     needs: [deploy-staging]
-    if: always() && (needs.deploy-staging.result == 'success')
+    if: needs.deploy-staging.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Post-deploy health check
         uses: ./.github/actions/post-deploy
         with:
-          prod_result: ${{ needs.deploy-prod.result }}
+          prod_result: ${{ needs.deploy-staging.result }}
           staging_result: ${{ needs.deploy-staging.result }}
           url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
           url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
 
   notify-with-discord-webhook:
     needs: [deploy-staging]
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Notify Discord

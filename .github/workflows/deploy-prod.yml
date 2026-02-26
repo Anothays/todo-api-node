@@ -31,6 +31,6 @@ jobs:
         uses: ./.github/actions/post-deploy
         with:
           prod_result: ${{ needs.deploy-prod.result }}
-          staging_result: ${{ needs.deploy-staging.result }}
+          staging_result: ${{ needs.deploy-prod.result }}
           url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
           url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
