@@ -2,14 +2,7 @@ import * as Sentry from "@sentry/node";
 import { Router } from "express";
 import { getDb, saveDb } from "../database/database.js";
 import { toArray, toObj } from "../helpers/utils.js";
-import {
-  todoInput,
-  todoInputPartial,
-  queryList,
-  querySearch,
-  paramsId,
-  validate,
-} from "./schemas/todo.schemas.js";
+import { paramsId, queryList, querySearch, todoInput, todoInputPartial, validate } from "./schemas/todo.schemas.js";
 
 const router = Router();
 
@@ -239,12 +232,7 @@ router.put("/:id", async (req, res) => {
     const description = bodyParsed.data.description !== undefined ? bodyParsed.data.description : old.description;
     const status = bodyParsed.data.status ?? old.status;
 
-    db.run("UPDATE todos SET title = ?, description = ?, status = ? WHERE id = ?", [
-      title,
-      description,
-      status,
-      id,
-    ]);
+    db.run("UPDATE todos SET title = ?, description = ?, status = ? WHERE id = ?", [title, description, status, id]);
     const rows = db.exec("SELECT * FROM todos WHERE id = ?", [id]);
     saveDb();
     res.json(toObj(rows));

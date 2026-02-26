@@ -7,5 +7,5 @@ const PORT = process.env.PORT || 3000;
 Sentry.setupExpressErrorHandler(app);
 
 app.listen(PORT, () => {
-  Sentry.logger.info(`App listening on port ${PORT}`, { port: PORT });
+  Sentry.logger.info(`App listening on port ${PORT}`);
 });
