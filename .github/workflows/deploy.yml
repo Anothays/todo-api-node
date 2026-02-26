@@ -61,8 +61,8 @@ jobs:
         run: railway redeploy --yes --service=${{ env.SVC_ID }}
 
   post-deploy:
-    needs: [deploy-prod, deploy-staging]
-    if: always() && (needs.deploy-prod.result == 'success' || needs.deploy-staging.result == 'success')
+    needs: [deploy-staging]
+    if: always() && (needs.deploy-staging.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Post-deploy health check

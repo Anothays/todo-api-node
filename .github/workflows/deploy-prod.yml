@@ -21,3 +21,16 @@ jobs:
         uses: actions/checkout@v6
       - name: Deploy to Railway
         run: railway redeploy --yes --service=${{ env.SVC_ID }}
+
+  post-deploy:
+    needs: [deploy-prod]
+    if: always() && (needs.deploy-prod.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post-deploy health check
+        uses: ./.github/actions/post-deploy
+        with:
+          prod_result: ${{ needs.deploy-prod.result }}
+          staging_result: ${{ needs.deploy-staging.result }}
+          url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
+          url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
