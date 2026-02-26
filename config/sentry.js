@@ -10,9 +10,6 @@ Sentry.init({
   sendDefaultPii: true,
   tracesSampleRate: 1.0,
   environment: process.env.NODE_ENV,
-  integrations: [
-    // send console.log, console.warn, and console.error calls as logs to Sentry
-    Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] }),
-  ],
+  integrations: [Sentry.consoleLoggingIntegration({ levels: ["log", "warn", "error"] })],
   enableLogs: true,
 });
