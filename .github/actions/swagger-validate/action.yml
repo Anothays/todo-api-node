@@ -10,5 +10,5 @@ runs:
         fs.writeFileSync('openapi.json', JSON.stringify(m.spec, null, 2));"
       shell: bash
     - name: Spectral lint
-      run: npx spectral lint openapi.json --ruleset config/.spectral.js --fail-severity=error
+      run: npx spectral lint openapi.json --ruleset .github/actions/swagger-validate/.spectral.yaml --fail-severity=error
       shell: bash
