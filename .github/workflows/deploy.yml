@@ -14,15 +14,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm install
+      - name: use configurable reusable workflow
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Lint
         run: npx eslint .
 
@@ -32,10 +25,8 @@ jobs:
       matrix:
         node-version: [20, 22, 24]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: use configurable reusable workflow
+        uses: ./.github/workflows/reusable-setup.yml
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
@@ -62,15 +53,8 @@ jobs:
   quality-gate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm install
+      - name: use configurable reusable workflow
+        uses: ./.github/workflows/reusable-setup.yml
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
@@ -81,14 +65,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm ci
+      - name: use configurable reusable workflow
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Build Docker image
         run: docker build -t todo-app:latest .
       - name: Run Trivy
