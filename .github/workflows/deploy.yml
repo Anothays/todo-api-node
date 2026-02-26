@@ -11,116 +11,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm install
-      - name: Lint
-        run: npx eslint .
+  ci:
+    uses: ./.github/workflows/reusable-setup.yml
+    secrets: inherit
 
-  test:
+  publish-image:
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20, 22, 24]
+    needs: [ci]
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm install
-      - name: Test
-        run: npm run test -- --coverage
-        env:
-          SECRET_KEY: TESTING_SECRET_KEY
-          API_KEY: TestingApiKey
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          name: coverage-report-${{ matrix.node-version }}
-          path: coverage/
-          retention-days: 5
-      - name: Send coverage to SonarCloud
-        uses: SonarSource/sonarqube-scan-action@v7.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
-
-  # Quality gate: SonarSource/sonarcloud + sonar.projectKey in sonar-project.properties
-  quality-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
+          images: ghcr.io/${{ github.repository }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
         with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm install
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v7.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
-
-  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install Dependencies
-        run: npm ci
-      - name: Build Docker image
-        run: docker build -t todo-app:latest .
-      - name: Run Trivy
-        uses: aquasecurity/trivy-action@0.34.1
-        with:
-          image-ref: "todo-app:latest"
-          format: "table"
-          exit-code: 1
-          ignore-unfixed: true
-          severity: "CRITICAL"
-
-  deploy-prod:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: production
-    container: ghcr.io/railwayapp/cli:latest
-    needs: [lint, test, quality-gate, security-scan]
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
-      SVC_ID: ${{ secrets.SVC_ID_PROD }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Deploy to Railway
-        run: railway up --ci --service=${{ env.SVC_ID }}
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     environment: staging
     container: ghcr.io/railwayapp/cli:latest
-    needs: [lint, test, quality-gate, security-scan]
+    needs: [publish-image]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
       SVC_ID: ${{ secrets.SVC_ID_STAGING }}
@@ -128,7 +58,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway up --ci --service=${{ env.SVC_ID }}
+        run: railway redeploy --yes --service=${{ env.SVC_ID }}
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+      SVC_ID: ${{ secrets.SVC_ID_PROD }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Deploy to Railway
+        run: railway redeploy --yes --service=${{ env.SVC_ID }}
 
   post-deploy:
     needs: [deploy-prod, deploy-staging]
@@ -176,33 +120,3 @@ jobs:
           url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           username: GitHub Actions
           # avatar_url: ${{ secrets.AVATAR_URL }}
-
-  publish-image:
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    needs: [deploy-prod]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels)
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
