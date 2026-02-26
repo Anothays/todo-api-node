@@ -1,0 +1,90 @@
+name: Todo pipeline
+
+on:
+  push:
+    branches: [develop]
+  # pull_request:
+  #   branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    uses: ./.github/workflows/reusable-setup.yml
+    secrets: inherit
+
+  publish-image:
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    runs-on: ubuntu-latest
+    needs: [quality]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    container: ghcr.io/railwayapp/cli:latest
+    needs: [publish-image]
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+      SVC_ID: ${{ secrets.SVC_ID_STAGING }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Deploy to Railway
+        run: railway redeploy --yes --service=${{ env.SVC_ID }}
+
+  post-deploy:
+    needs: [deploy-staging]
+    if: needs.deploy-staging.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Post-deploy health check
+        uses: ./.github/actions/post-deploy
+        with:
+          prod_result: ${{ needs.deploy-staging.result }}
+          staging_result: ${{ needs.deploy-staging.result }}
+          url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
+          url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
+
+  notify-with-discord-webhook:
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Notify Discord
+        uses: ./.github/actions/discord
+        with:
+          result: ${{ needs.deploy-staging.result }}
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

@@ -1,0 +1,42 @@
+name: Notify Discord webhook
+description: Prépare et envoie un message Discord avec le statut du déploiement
+inputs:
+  result:
+    description: Résultat du job de déploiement (success, failure, skipped)
+    required: true
+  webhook:
+    description: URL du webhook Discord
+    required: true
+  status:
+    description: Statut du job (success, failure, etc.)
+    required: true
+  run_url:
+    description: URL du run GitHub Actions
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Prepare Discord message
+      id: msg
+      run: |
+        RESULT="${{ inputs.result }}"
+        LABEL=$(echo "$RESULT" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
+        echo "description=$LABEL" >> $GITHUB_OUTPUT
+        if [ "$RESULT" = "failure" ]; then
+          echo "title=Deploy - Échec" >> $GITHUB_OUTPUT
+          echo "color=16711680" >> $GITHUB_OUTPUT
+        else
+          echo "title=Deploy - Succès" >> $GITHUB_OUTPUT
+          echo "color=65280" >> $GITHUB_OUTPUT
+        fi
+      shell: bash
+    - name: Notify Discord
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ inputs.webhook }}
+        status: ${{ inputs.status }}
+        title: ${{ steps.msg.outputs.title }}
+        description: ${{ steps.msg.outputs.description }}
+        color: ${{ steps.msg.outputs.color }}
+        url: ${{ inputs.run_url }}
+        username: GitHub Actions
