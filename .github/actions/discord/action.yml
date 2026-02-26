@@ -1,11 +1,8 @@
 name: Notify Discord webhook
-description: Prépare et envoie un message Discord avec le statut des déploiements prod/staging
+description: Prépare et envoie un message Discord avec le statut du déploiement
 inputs:
-  prod_result:
-    description: Résultat du job deploy-prod (success, failure, skipped)
-    required: true
-  staging_result:
-    description: Résultat du job deploy-staging (success, failure, skipped)
+  result:
+    description: Résultat du job de déploiement (success, failure, skipped)
     required: true
   webhook:
     description: URL du webhook Discord
@@ -22,12 +19,10 @@ runs:
     - name: Prepare Discord message
       id: msg
       run: |
-        PROD="${{ inputs.prod_result }}"
-        STAGING="${{ inputs.staging_result }}"
-        PROD_LABEL=$(echo "$PROD" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
-        STAGING_LABEL=$(echo "$STAGING" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
-        echo "description=**Prod:** $PROD_LABEL | **Staging:** $STAGING_LABEL" >> $GITHUB_OUTPUT
-        if [ "$PROD" = "failure" ] || [ "$STAGING" = "failure" ]; then
+        RESULT="${{ inputs.result }}"
+        LABEL=$(echo "$RESULT" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
+        echo "description=$LABEL" >> $GITHUB_OUTPUT
+        if [ "$RESULT" = "failure" ]; then
           echo "title=Deploy - Échec" >> $GITHUB_OUTPUT
           echo "color=16711680" >> $GITHUB_OUTPUT
         else
