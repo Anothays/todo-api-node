@@ -1,0 +1,24 @@
+name: Setup project
+description: Checkout, set up Node.js and install dependencies (npm ci)
+inputs:
+  node-version:
+    description: Node.js version
+    required: false
+    default: '24'
+  cache:
+    description: Package manager cache (e.g. npm)
+    required: false
+    default: 'npm'
+runs:
+  using: composite
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+    - name: Set up Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.cache }}
+    - name: Install Dependencies
+      run: npm ci
+      shell: bash
