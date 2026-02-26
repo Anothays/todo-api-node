@@ -1,0 +1,42 @@
+name: Post-deploy and notify
+
+on:
+  workflow_call:
+    inputs:
+      deploy_result:
+        description: Résultat du job de déploiement (success, failure, skipped)
+        required: true
+        type: string
+      environment:
+        description: Environnement (production | staging)
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  post-deploy:
+    if: inputs.deploy_result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Post-deploy health check
+        uses: ./.github/actions/post-deploy
+        with:
+          prod_result: ${{ inputs.deploy_result }}
+          staging_result: ${{ inputs.deploy_result }}
+          url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
+          url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
+
+  notify-with-discord-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Notify Discord
+        uses: ./.github/actions/discord
+        with:
+          result: ${{ inputs.deploy_result }}
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ inputs.deploy_result }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
