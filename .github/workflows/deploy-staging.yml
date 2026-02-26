@@ -1,4 +1,4 @@
-name: Todo pipeline
+name: STAGING DEPLOYMENT
 
 on:
   push:
