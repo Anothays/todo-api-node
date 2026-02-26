@@ -147,7 +147,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway redeploy --ci --service=${{ env.SVC_ID }}
+        run: railway redeploy --service=${{ env.SVC_ID }}
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
@@ -161,7 +161,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway redeploy --ci --service=${{ env.SVC_ID }}
+        run: railway redeploy --service=${{ env.SVC_ID }}
 
   post-deploy:
     needs: [deploy-prod, deploy-staging]
