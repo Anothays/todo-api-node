@@ -1,4 +1,4 @@
-name: Todo pipeline
+name: STAGING DEPLOYMENT
 
 on:
   push:
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   quality:
-    uses: ./.github/workflows/reusable-setup.yml
+    uses: ./.github/workflows/quality.yml
     secrets: inherit
 
   publish-image:
