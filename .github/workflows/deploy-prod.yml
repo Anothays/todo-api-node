@@ -1,0 +1,23 @@
+name: PRODUCTION DEPLOYMENT
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: production
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+      SVC_ID: ${{ secrets.SVC_ID_PROD }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Deploy to Railway
+        run: railway redeploy --yes --service=${{ env.SVC_ID }}

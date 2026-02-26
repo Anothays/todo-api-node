@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
+  quality:
     uses: ./.github/workflows/reusable-setup.yml
     secrets: inherit
 
@@ -60,31 +60,18 @@ jobs:
       - name: Deploy to Railway
         run: railway redeploy --yes --service=${{ env.SVC_ID }}
 
-  deploy-prod:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: production
-    container: ghcr.io/railwayapp/cli:latest
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
-      SVC_ID: ${{ secrets.SVC_ID_PROD }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Deploy to Railway
-        run: railway redeploy --yes --service=${{ env.SVC_ID }}
-
   post-deploy:
     needs: [deploy-prod, deploy-staging]
     if: always() && (needs.deploy-prod.result == 'success' || needs.deploy-staging.result == 'success')
     runs-on: ubuntu-latest
     steps:
-      - name: Check /health (prod)
-        if: needs.deploy-prod.result == 'success'
-        run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_PROD }}/health"
-      - name: Check /health (staging)
-        if: needs.deploy-staging.result == 'success'
-        run: curl -f -s "${{ secrets.RAILWAY_BASE_URL_STAGING }}/health"
+      - name: Post-deploy health check
+        uses: ./.github/actions/post-deploy
+        with:
+          prod_result: ${{ needs.deploy-prod.result }}
+          staging_result: ${{ needs.deploy-staging.result }}
+          url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
+          url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
 
   notify-with-discord-webhook:
     needs: [deploy-prod, deploy-staging]
