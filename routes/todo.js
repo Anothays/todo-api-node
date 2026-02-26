@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/node";
 import { Router } from "express";
 import { getDb, saveDb } from "../database/database.js";
 import { toArray, toObj } from "../helpers/utils.js";
@@ -41,6 +42,7 @@ const router = Router();
 // POST /todos
 router.post("/", async (req, res) => {
   try {
+    Sentry.logger.info("POST /todos create", { path: "/todos", method: "POST" });
     const parsed = validate(todoInput, req.body);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { title, description, status } = parsed.data;
@@ -52,7 +54,7 @@ router.post("/", async (req, res) => {
     const todo = toObj(row);
     res.status(201).json(todo);
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -89,6 +91,7 @@ router.post("/", async (req, res) => {
 // GET /todos
 router.get("/", async (req, res) => {
   try {
+    Sentry.logger.info("GET /todos list", { path: "/todos", method: "GET" });
     const parsed = validate(queryList, req.query);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { skip, limit } = parsed.data;
@@ -97,7 +100,7 @@ router.get("/", async (req, res) => {
     const x = toArray(rows);
     res.json(x);
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -127,6 +130,7 @@ router.get("/", async (req, res) => {
  */
 router.get("/search/all", async (req, res) => {
   try {
+    Sentry.logger.info("GET /todos/search/all", { path: "/todos/search/all", method: "GET" });
     const parsed = validate(querySearch, req.query);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { q } = parsed.data;
@@ -134,7 +138,7 @@ router.get("/search/all", async (req, res) => {
     const results = db.exec("SELECT * FROM todos WHERE title LIKE ?", [`%${q}%`]);
     res.json(toArray(results));
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -169,6 +173,7 @@ router.get("/search/all", async (req, res) => {
 // GET /todos/:id
 router.get("/:id", async (req, res) => {
   try {
+    Sentry.logger.info("GET /todos/:id", { path: "/todos", method: "GET", id: req.params.id });
     const parsed = validate(paramsId, req.params);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { id } = parsed.data;
@@ -177,7 +182,7 @@ router.get("/:id", async (req, res) => {
     if (!rows.length || !rows[0].values.length) return res.status(404).json({ detail: "Todo not found" });
     res.json(toObj(rows));
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -217,6 +222,7 @@ router.get("/:id", async (req, res) => {
 // PUT /todos/:id
 router.put("/:id", async (req, res) => {
   try {
+    Sentry.logger.info("PUT /todos/:id", { path: "/todos", method: "PUT", id: req.params.id });
     const paramsParsed = validate(paramsId, req.params);
     if (!paramsParsed.success) return res.status(422).json({ detail: paramsParsed.error.message });
     const { id } = paramsParsed.data;
@@ -243,7 +249,7 @@ router.put("/:id", async (req, res) => {
     saveDb();
     res.json(toObj(rows));
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -282,6 +288,7 @@ router.put("/:id", async (req, res) => {
 // DELETE /todos/:id
 router.delete("/:id", async (req, res) => {
   try {
+    Sentry.logger.info("DELETE /todos/:id", { path: "/todos", method: "DELETE", id: req.params.id });
     const parsed = validate(paramsId, req.params);
     if (!parsed.success) return res.status(422).json({ detail: parsed.error.message });
     const { id } = parsed.data;
@@ -292,7 +299,7 @@ router.delete("/:id", async (req, res) => {
     saveDb();
     res.json({ detail: "Todo deleted" });
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
