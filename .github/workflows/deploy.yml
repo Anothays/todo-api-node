@@ -65,7 +65,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container: ghcr.io/railwayapp/cli:latest
-    needs: [ci]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
       SVC_ID: ${{ secrets.SVC_ID_PROD }}
