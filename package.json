@@ -5,12 +5,13 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "node main.js --watch",
+    "start": "node --import ./config/sentry.js main.js",
+    "dev": "node --import ./config/sentry.js main.js --watch",
     "lint": "eslint .",
     "test": "rm -f todo.test.db && node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --coverage"
   },
   "dependencies": {
+    "@sentry/node": "^10.40.0",
     "dotenv": "^17.3.1",
     "express": "^5.1.0",
     "helmet": "^8.1.0",

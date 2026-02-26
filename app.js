@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 import express from "express";
+import * as Sentry from "@sentry/node";
 import swaggerUi from "swagger-ui-express";
+import { helmetMiddleware } from "./config/helmet.js";
 import { spec } from "./config/swagger.js";
 import todoRouter from "./routes/todo.js";
-import { helmetMiddleware } from "./config/helmet.js";
 
 dotenv.config();
 
@@ -33,9 +34,10 @@ app.use(helmetMiddleware);
  */
 app.get("/", (_req, res) => {
   try {
+    Sentry.logger.info("GET / root", { path: "/" });
     res.json({ message: "Welcome to the Enhanced Express Todo App!" });
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
@@ -63,9 +65,10 @@ app.get("/", (_req, res) => {
  */
 app.get("/health", (_req, res) => {
   try {
+    Sentry.logger.info("GET /health", { path: "/health" });
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   } catch (err) {
-    console.error(err);
+    Sentry.captureException(err);
     res.status(500).json({ detail: err.message || "Internal server error" });
   }
 });
