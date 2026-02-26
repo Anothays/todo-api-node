@@ -51,12 +51,13 @@ function saveDb() {
 }
 
 /**
- * Resets the in-memory db and removes the db file. For test isolation only.
+ * Resets the in-memory db and optionally removes the db file. For test isolation only.
+ * @param {boolean} [deleteFile=true] - If false, only clears in-memory db without deleting the file.
  * @returns {void}
  */
-function resetForTesting() {
+function resetForTesting(deleteFile = true) {
   db = null;
-  if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
+  if (deleteFile && fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH);
 }
 
 export { getDb, saveDb, resetForTesting };

@@ -40,7 +40,7 @@ npm -v    # 10.x ou supérieur
 ### 1. Cloner le dépôt
 
 ```bash
-git clone <url-du-repo>
+git clone git@github.com:Anothays/todo-api-node.git
 cd todo-api-node
 ```
 
