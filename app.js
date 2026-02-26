@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
+import { helmetMiddleware } from "./config/helmet.js";
 import { spec } from "./config/swagger.js";
 import todoRouter from "./routes/todo.js";
-import { helmetMiddleware } from "./config/helmet.js";
 
 dotenv.config();
 

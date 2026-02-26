@@ -5,8 +5,8 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "node main.js --watch",
+    "start": "node --import ./config/sentry.js main.js",
+    "dev": "node --import ./config/sentry.js main.js --watch",
     "lint": "eslint .",
     "test": "rm -f todo.test.db && node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --coverage"
   },
