@@ -147,7 +147,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway up --ci --service=${{ env.SVC_ID }} --image ghcr.io/anothays/todo-api-node:develop
+        run: railway up --ci --service=${{ env.SVC_ID }}
 
   deploy-prod:
     if: github.ref == 'refs/heads/main'
@@ -161,7 +161,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Deploy to Railway
-        run: railway up --ci --service=${{ env.SVC_ID }} --image ghcr.io/anothays/todo-api-node:develop
+        run: railway up --ci --service=${{ env.SVC_ID }}
 
   post-deploy:
     needs: [deploy-prod, deploy-staging]
