@@ -1,0 +1,14 @@
+name: Swagger validate
+description: Generate OpenAPI spec from config and lint with Spectral
+runs:
+  using: composite
+  steps:
+    - name: Generate OpenAPI spec
+      run: |
+        node --input-type=module -e "const m = await import('./config/swagger.js'); 
+        const fs = await import('fs'); 
+        fs.writeFileSync('openapi.json', JSON.stringify(m.spec, null, 2));"
+      shell: bash
+    - name: Spectral lint
+      run: npx spectral lint openapi.json --ruleset .github/actions/swagger-validate/.spectral.yaml --fail-severity=error
+      shell: bash
