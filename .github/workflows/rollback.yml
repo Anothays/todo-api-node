@@ -1,0 +1,8 @@
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      action: rollback
+      description: "Trigger a rollback to the previous stable version"
+      required: true
