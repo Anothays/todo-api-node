@@ -36,3 +36,17 @@ jobs:
           staging_result: ${{ needs.deploy-prod.result }}
           url_prod: ${{ secrets.RAILWAY_BASE_URL_PROD }}
           url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
+
+  notify-with-discord-webhook:
+    needs: [deploy-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Notify Discord
+        uses: ./.github/actions/discord
+        with:
+          result: ${{ needs.deploy-prod.result }}
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
