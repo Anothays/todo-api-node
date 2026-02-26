@@ -74,36 +74,14 @@ jobs:
           url_staging: ${{ secrets.RAILWAY_BASE_URL_STAGING }}
 
   notify-with-discord-webhook:
-    needs: [deploy-prod, deploy-staging]
+    needs: [deploy-staging]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare Discord message
-        id: msg
-        run: |
-          PROD="${{ needs.deploy-prod.result }}"
-          STAGING="${{ needs.deploy-staging.result }}"
-          PROD_LABEL=$(echo "$PROD" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
-          STAGING_LABEL=$(echo "$STAGING" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
-          echo "description=**Prod:** $PROD_LABEL | **Staging:** $STAGING_LABEL" >> $GITHUB_OUTPUT
-          if [ "$PROD" = "failure" ] || [ "$STAGING" = "failure" ]; then
-            echo "title=Deploy - Échec" >> $GITHUB_OUTPUT
-            echo "color=16711680" >> $GITHUB_OUTPUT
-          else
-            echo "title=Deploy - Succès" >> $GITHUB_OUTPUT
-            echo "color=65280" >> $GITHUB_OUTPUT
-          fi
       - name: Notify Discord
-        if: always()
-        uses: sarisia/actions-status-discord@v1
+        uses: ./.github/actions/discord
         with:
+          result: ${{ needs.deploy-staging.result }}
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
-          # content: ""
-          title: ${{ steps.msg.outputs.title }}
-          description: ${{ steps.msg.outputs.description }}
-          # image: ${{ secrets.EMBED_IMAGE }}
-          color: ${{ steps.msg.outputs.color }}
-          url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          username: GitHub Actions
-          # avatar_url: ${{ secrets.AVATAR_URL }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

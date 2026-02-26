@@ -1,5 +1,5 @@
-name: Post-deploy health check
-description: Vérifie les endpoints /health prod et staging après déploiement
+name: Notify Discord webhook
+description: Prépare et envoie un message Discord avec le statut des déploiements prod/staging
 inputs:
   prod_result:
     description: Résultat du job deploy-prod (success, failure, skipped)
@@ -7,20 +7,41 @@ inputs:
   staging_result:
     description: Résultat du job deploy-staging (success, failure, skipped)
     required: true
-  url_prod:
-    description: URL de base prod pour /health
+  webhook:
+    description: URL du webhook Discord
     required: true
-  url_staging:
-    description: URL de base staging pour /health
+  status:
+    description: Statut du job (success, failure, etc.)
+    required: true
+  run_url:
+    description: URL du run GitHub Actions
     required: true
 runs:
   using: composite
   steps:
-    - name: Check /health (prod)
-      if: inputs.prod_result == 'success'
-      run: curl -f -s "${{ inputs.url_prod }}/health"
+    - name: Prepare Discord message
+      id: msg
+      run: |
+        PROD="${{ inputs.prod_result }}"
+        STAGING="${{ inputs.staging_result }}"
+        PROD_LABEL=$(echo "$PROD" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
+        STAGING_LABEL=$(echo "$STAGING" | sed 's/success/✅ Réussi/; s/failure/❌ Échec/; s/skipped/⏭️ Ignoré/')
+        echo "description=**Prod:** $PROD_LABEL | **Staging:** $STAGING_LABEL" >> $GITHUB_OUTPUT
+        if [ "$PROD" = "failure" ] || [ "$STAGING" = "failure" ]; then
+          echo "title=Deploy - Échec" >> $GITHUB_OUTPUT
+          echo "color=16711680" >> $GITHUB_OUTPUT
+        else
+          echo "title=Deploy - Succès" >> $GITHUB_OUTPUT
+          echo "color=65280" >> $GITHUB_OUTPUT
+        fi
       shell: bash
-    - name: Check /health (staging)
-      if: inputs.staging_result == 'success'
-      run: curl -f -s "${{ inputs.url_staging }}/health"
-      shell: bash
+    - name: Notify Discord
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ inputs.webhook }}
+        status: ${{ inputs.status }}
+        title: ${{ steps.msg.outputs.title }}
+        description: ${{ steps.msg.outputs.description }}
+        color: ${{ steps.msg.outputs.color }}
+        url: ${{ inputs.run_url }}
+        username: GitHub Actions
