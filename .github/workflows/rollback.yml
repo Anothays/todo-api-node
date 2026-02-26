@@ -1,23 +1,66 @@
-# name: rollback
+name: ROLLBACK
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       action: 
-#         description: "Trigger a rollback to the previous stable version"
-#         required: true
-#         type: string
-# jobs:
-#   rollback:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v6
-#       - name: Log in to GHCR
-#         uses: docker/login-action@v3
-#         with:
-#           registry: ghcr.io
-#           username: ${{ github.repository_owner }}
-#           password: ${{ secrets.GITHUB_TOKEN }}
-#       - name: Pull previous stable image
-      
+on:
+  workflow_dispatch:
+    inputs:
+      steps_back:
+        description: "Nombre de versions à reculer (1 = précédente)"
+        required: true
+        default: "1"
+      owner_type:
+        description: "Type du propriétaire du package GHCR (user ou org)"
+        required: false
+        default: "user"
+        type: choice
+        options:
+          - user
+          - org
+
+jobs:
+  rollback:
+    name: Rollback production
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
+      SVC_ID: ${{ secrets.SVC_ID_PROD }}
+      PACKAGE_NAME: ${{ github.event.repository.name }}
+      OWNER_TYPE: ${{ github.event.inputs.owner_type || 'user' }}
+
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Get previous image digest
+        id: previous_image
+        run: |
+          if [ "$OWNER_TYPE" = "org" ]; then
+            API_PATH="/orgs/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions"
+          else
+            API_PATH="/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions"
+          fi
+          INDEX="${{ github.event.inputs.steps_back }}"
+          PREVIOUS_DIGEST=$(gh api "$API_PATH" --jq ".[$INDEX].name")
+          echo "digest=$PREVIOUS_DIGEST" >> $GITHUB_OUTPUT
+          echo "🔍 Rollback vers l'image : $PREVIOUS_DIGEST"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rollback on Railway
+        run: |
+          railway variables set IMAGE_TAG=${{ steps.previous_image.outputs.digest }}
+          echo "✅ Variable IMAGE_TAG mise à jour sur Railway"
+      - name: Redeploy Railway
+        run: railway redeploy --yes --service=$SVC_ID
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "Rollback Production"
+          description: |
+            **Image:** ${{ steps.previous_image.outputs.digest }}
+            **Versions reculées:** ${{ github.event.inputs.steps_back }}
+          username: GitHub Actions
