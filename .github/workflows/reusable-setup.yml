@@ -1,7 +1,7 @@
 name: Reusable set up project
 
 on:
-	workflow_call:
+  workflow_call:
 jobs:
   setup-workflow:
     runs-on: ubuntu-latest
