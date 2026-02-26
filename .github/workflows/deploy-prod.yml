@@ -27,6 +27,8 @@ jobs:
     if: always() && (needs.deploy-prod.result == 'success')
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Post-deploy health check
         uses: ./.github/actions/post-deploy
         with:
