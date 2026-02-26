@@ -14,6 +14,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup project
         uses: ./.github/actions/setup-project
       - name: Lint
@@ -25,6 +27,8 @@ jobs:
       matrix:
         node-version: [20, 22, 24]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup project
         uses: ./.github/actions/setup-project
         with:
@@ -51,6 +55,8 @@ jobs:
   quality-gate:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup project
         uses: ./.github/actions/setup-project
       - name: SonarCloud Scan
@@ -62,6 +68,8 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Setup project
         uses: ./.github/actions/setup-project
       - name: Build Docker image
