@@ -65,6 +65,8 @@ jobs:
     if: needs.deploy-staging.result == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Post-deploy health check
         uses: ./.github/actions/post-deploy
         with:
@@ -77,6 +79,8 @@ jobs:
     needs: [deploy-staging]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Notify Discord
         uses: ./.github/actions/discord
         with:
