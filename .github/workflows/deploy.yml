@@ -19,7 +19,7 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     environment: staging
     runs-on: ubuntu-latest
-    needs: [lint, test, quality-gate, security-scan]
+    needs: [ci]
     permissions:
       contents: read
       packages: write
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container: ghcr.io/railwayapp/cli:latest
-    needs: [lint, test, quality-gate, security-scan]
+    needs: [ci]
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PROD }}
       SVC_ID: ${{ secrets.SVC_ID_PROD }}
