@@ -1,0 +1,39 @@
+name: Publish Docker image
+description: Build and push Docker image to GHCR (or another registry)
+inputs:
+  images:
+    description: Full image name (e.g. ghcr.io/owner/repo)
+    required: true
+  registry:
+    description: Registry for docker login
+    required: false
+    default: ghcr.io
+  context:
+    description: Docker build context path
+    required: false
+    default: .
+  push:
+    description: Push image after build
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata (tags, labels)
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ inputs.images }}
+    - name: Build and push
+      uses: docker/build-push-action@v6.19.2
+      with:
+        context: ${{ inputs.context }}
+        push: ${{ inputs.push }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
