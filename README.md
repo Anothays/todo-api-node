@@ -99,6 +99,10 @@ Le serveur écoute sur `http://localhost:3000` (ou le port défini par `PORT`).
 - `helpers/utils.js` – Utilitaires (formatage, etc.)
 - `tests/` – Tests Jest et supertest
 
+## Monitoring
+
+Le monitoring des erreurs en production est assuré avec [Sentry](https://sentry.io/).
+
 ## Licence
 
 MIT (ou celle indiquée dans le dépôt).
