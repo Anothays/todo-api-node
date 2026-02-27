@@ -3,6 +3,14 @@ name: ROLLBACK
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        description: "Branche cible (détermine l'environnement)"
+        required: true
+        type: choice
+        options:
+          - main
+          - develop
+        default: "main"
       steps_back:
         description: "Nombre de versions à reculer (1 = précédente)"
         required: true
@@ -17,7 +25,8 @@ on:
           - org
 
 jobs:
-  rollback:
+  rollback-prod:
+    if: github.event.inputs.branch == 'main'
     name: Rollback production
     runs-on: ubuntu-latest
     environment: production
@@ -26,6 +35,7 @@ jobs:
       SVC_ID: ${{ secrets.SVC_ID_PROD }}
       PACKAGE_NAME: ${{ github.event.repository.name }}
       OWNER_TYPE: ${{ github.event.inputs.owner_type || 'user' }}
+      TARGET_ENV: production
 
     steps:
       - name: Install Railway CLI
@@ -48,10 +58,10 @@ jobs:
 
       - name: Rollback on Railway
         run: |
-          railway variables set IMAGE_TAG=${{ steps.previous_image.outputs.digest }}
-          echo "✅ Variable IMAGE_TAG mise à jour sur Railway"
+          railway variables set -s "$SVC_ID" IMAGE_TAG=${{ steps.previous_image.outputs.digest }}
+          echo "✅ Variable IMAGE_TAG mise à jour sur Railway ($TARGET_ENV)"
       - name: Redeploy Railway
-        run: railway redeploy --yes --service=$SVC_ID
+        run: railway redeploy --yes -s "$SVC_ID"
 
       - name: Notify Discord
         if: always()
@@ -60,6 +70,56 @@ jobs:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           status: ${{ job.status }}
           title: "Rollback Production"
+          description: |
+            **Image:** ${{ steps.previous_image.outputs.digest }}
+            **Versions reculées:** ${{ github.event.inputs.steps_back }}
+          username: GitHub Actions
+
+  rollback-staging:
+    if: github.event.inputs.branch == 'develop'
+    name: Rollback staging
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+      SVC_ID: ${{ secrets.SVC_ID_STAGING }}
+      PACKAGE_NAME: ${{ github.event.repository.name }}
+      OWNER_TYPE: ${{ github.event.inputs.owner_type || 'user' }}
+      TARGET_ENV: staging
+
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Get previous image digest
+        id: previous_image
+        run: |
+          if [ "$OWNER_TYPE" = "org" ]; then
+            API_PATH="/orgs/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions"
+          else
+            API_PATH="/users/${{ github.repository_owner }}/packages/container/${PACKAGE_NAME}/versions"
+          fi
+          INDEX="${{ github.event.inputs.steps_back }}"
+          PREVIOUS_DIGEST=$(gh api "$API_PATH" --jq ".[$INDEX].name")
+          echo "digest=$PREVIOUS_DIGEST" >> $GITHUB_OUTPUT
+          echo "🔍 Rollback vers l'image : $PREVIOUS_DIGEST"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rollback on Railway
+        run: |
+          railway variables set -s "$SVC_ID" IMAGE_TAG=${{ steps.previous_image.outputs.digest }}
+          echo "✅ Variable IMAGE_TAG mise à jour sur Railway ($TARGET_ENV)"
+      - name: Redeploy Railway
+        run: railway redeploy --yes -s "$SVC_ID"
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "Rollback Staging"
           description: |
             **Image:** ${{ steps.previous_image.outputs.digest }}
             **Versions reculées:** ${{ github.event.inputs.steps_back }}
