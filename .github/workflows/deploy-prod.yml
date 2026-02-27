@@ -22,6 +22,8 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
       - name: Build and push image
         uses: ./.github/actions/publish-image
         with:
