@@ -48,7 +48,7 @@ jobs:
 
       - name: Rollback on Railway
         run: |
-          railway variables set IMAGE_TAG=${{ steps.previous_image.outputs.digest }}
+          railway variables set IMAGE_TAG=${{ steps.previous_image.outputs.digest }} --service=$SVC_ID
           echo "✅ Variable IMAGE_TAG mise à jour sur Railway"
       - name: Redeploy Railway
         run: railway redeploy --yes --service=$SVC_ID
