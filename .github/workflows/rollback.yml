@@ -3,14 +3,6 @@ name: ROLLBACK
 on:
   workflow_dispatch:
     inputs:
-      branch:
-        description: "Branche cible (détermine l'environnement)"
-        required: true
-        type: choice
-        options:
-          - main
-          - develop
-        default: "main"
       steps_back:
         description: "Nombre de versions à reculer (1 = précédente)"
         required: true
@@ -26,7 +18,7 @@ on:
 
 jobs:
   rollback-prod:
-    if: github.event.inputs.branch == 'main'
+    if: github.ref_name == 'main'
     name: Rollback production
     runs-on: ubuntu-latest
     environment: production
@@ -76,7 +68,7 @@ jobs:
           username: GitHub Actions
 
   rollback-staging:
-    if: github.event.inputs.branch == 'develop'
+    if: github.ref_name == 'develop'   # ← utilise la branche du "Use workflow from"
     name: Rollback staging
     runs-on: ubuntu-latest
     environment: staging
