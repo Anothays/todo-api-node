@@ -3,7 +3,7 @@
 API REST de gestion de tâches (todos), construite avec Express et SQLite (sql.js).
 
 ## Badges
-
+![Sentry](https://img.shields.io/badge/monitored%20by-Sentry-362D59?logo=sentry&logoColor=white)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Anothays_todo-api-node&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Anothays_todo-api-node)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D24.x-brightgreen.svg)](https://nodejs.org/)
 [![npm](https://img.shields.io/badge/npm-10.x-red.svg)](https://www.npmjs.com/)
